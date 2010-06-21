@@ -1,0 +1,52 @@
+.demos-loading {
+  background: rgba(0,0,0,.3) url(../images/loading.gif) center center no-repeat;
+  display: block;
+  width: 10em;
+  height: 10em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -5em;
+  margin-top: -5em;  
+  -webkit-border-radius: .5em;
+  color: #fff;
+  text-shadow: #000 0 1px 1px;
+  text-align: center;
+  padding-top: 8em;
+  font-weight: bold;
+}
+
+.call {
+  border: 1px solid rgba(0,0,0,.3);
+  -webkit-border-radius: .5em;
+  margin: 4px;
+  height: 60px;
+  padding: 8px;
+}
+
+div.call.x-item-selected{
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#83A3AE), color-stop(0.02, #50707B), to(#32464D));
+  border-bottom-color: #141C1E;
+  border-top-color: #28383D;
+  color: white;
+  text-shadow: rgba(0, 0, 0, 0.496094);
+}
+
+div.call div.caller{
+  text-transform: uppercase;
+  width: 40%;
+  float: left;
+}
+
+div.call div.number{
+  width: 40%;
+  float: right;
+  font-size: 11px;
+  text-align: right;
+}
+
+div.call div.details{
+  width: 100%;
+  clear: both;
+  font-size: 12px;
+}
