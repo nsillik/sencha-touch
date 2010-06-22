@@ -16,11 +16,16 @@
   font-weight: bold;
 }
 
+.splash p{
+  text-align: center;
+  font-size: 9px;
+}
+
 .call {
   border: 1px solid rgba(0,0,0,.3);
   -webkit-border-radius: .5em;
   margin: 4px;
-  height: 60px;
+  height: 50px;
   padding: 8px;
 }
 
@@ -34,8 +39,9 @@ div.call.x-item-selected{
 
 div.call div.caller{
   text-transform: uppercase;
-  width: 40%;
-  float: left;
+  background: url(../images/mobile-phone.png) left center no-repeat;
+  padding: 10px 0px 15px 30px;
+  height: 34px;
 }
 
 div.call div.number{

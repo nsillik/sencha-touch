@@ -1,11 +1,12 @@
 Ext.ns('geefive');
-
 Ext.setup({
     icon: 'icon.png',
     glossOnIcon: false,
     onReady: function() {
+      // Google Charts
       // Login Form
       var user = {id: 0};
+      var client_id = 1001;
       var loggedIn = function(){
         return user.id > 0;
       };
@@ -21,7 +22,7 @@ Ext.setup({
       // Login to geefive client center
       var clientCenterLogin = function(data,b){
         Ext.Ajax.request({
-          url: '/user/mobile_login',
+          url: '/mobile/login',
           params: data,
           success: function(response,opts){
             var r = Ext.decode(response.responseText);
@@ -29,10 +30,9 @@ Ext.setup({
             b.setText('Login');
             if(r.user.id == 0){
               form.show();
-              console.log(form);
               form.setValues({login: 'Invalid Login', password: ''});
             }else{
-              loadingWindow.hide();
+              Ext.getBody().unmask();
               showHideLogout();
               form.hide();
             }
@@ -43,7 +43,7 @@ Ext.setup({
       // Get geefive client center status
       var checkClientCenterLogin = function() {
         Ext.Ajax.request({
-          url: '/user/mobile_user',
+          url: '/mobile/user',
           success: function(response, opts) {
             var r = Ext.decode(response.responseText);
             user = r.user;
@@ -51,23 +51,9 @@ Ext.setup({
               form.show();
             }else{
               showHideLogout();
-              loadingWindow.hide();
+              Ext.getBody().unmask();
               form.hide();
             }
-          }
-        })
-      };
-      
-      var callData = [];
-      
-      var loadCalls = function() {
-        Ext.Ajax.request({
-          url: '/user/mobile_calls',
-          success: function(response, opts) {
-            var r = Ext.decode(response.responseText);
-            callData = r.calls;
-            callStore.loadData(callData);
-            Ext.getBody().unmask();
           }
         })
       };
@@ -89,12 +75,12 @@ Ext.setup({
         hidden: true,
         listeners: {
           'activate': function(t){ 
-            loadingWindow.show();
+            Ext.getBody().mask(false, '<div class="demos-loading">Loading&hellip;</div>');
             user = {id: 0};
             Ext.Ajax.request({
               url: '/user/logout',
               success: function(){
-                loadingWindow.hide();
+                Ext.getBody().unmask();
                 form.show();
               }
             });
@@ -155,19 +141,16 @@ Ext.setup({
           });
       }
       
-      if (Ext.platform.isPhone) {
-          formBase.fullscreen = true;
-      } else {
-          Ext.apply(formBase, {
-              autoRender: true,
-              floating: true,
-              modal: true,
-              centered: true,
-              hideOnMaskTap: false,
-              height: 285,
-              width: 340
-          });
-      };
+
+      Ext.apply(formBase, {
+        autoRender: true,
+        floating: true,
+        modal: true,
+        centered: true,
+        hideOnMaskTap: false,
+        height: 285,
+        width: 340
+      });
       
       var loadingWindow = new Ext.Panel({
         autoRender: true,
@@ -180,92 +163,69 @@ Ext.setup({
         html: '<img src="g5.jpg" />'
       });
       
-      loadingWindow.show();
+      //loadingWindow.show();
       
+      Ext.getBody().mask(false, '<div class="demos-loading">Loading&hellip;</div>');
       var form = new Ext.form.FormPanel(formBase);
       
-      // Nest List For Reports
-      // Call Report
-      Ext.regModel('Call', {
-        fields: [
-          {name: 'media_type_id', type: 'int'},
-          {name: 'caller_name', type: 'string'},
-          {name: 'time_of_day', type: 'string'},
-          {name: 'call_status', type: 'string'},
-          {name: 'channel', type: 'string'},
-          {name: 'tracking_purpose', type: 'string'},
-          {name: 'call_start', type: 'date'},
-          {name: 'client_name', type: 'string'},
-          {name: 'store_name', type: 'string'},
-          {name: 'service_id', type: 'int'},
-          {name: 'id', type: 'int'},
-          {name: 'inboundno', type: 'string'},
-          {name: 'forwardno', type: 'string'},
-          {name: 'call_end', type: 'date'},
-          {name: 'duration', type: 'string'},
-          {name: 'caller_number', type: 'string'},
-          {name: 'call_id', type: 'string'},
-          {name: 'include_in_totals', type: 'bool'}
-          ]
-      });
+      var callView = new geefive.callReport();
       
-      callStore = new Ext.data.Store({
-        model: 'Call',
-        data: []
-      });
-      
-      callView = new Ext.DataView({
-        title: 'Calls',
-        iconCls: 'favorites',
-        store: callStore,
-        emptyText   : '<p style="padding: 10px">No calls found matching that search</p>',
-        tpl: [
-        '<tpl for=".">',
-            '<div class="call">',
-              '<div class="caller">{caller_name}</div>',
-              '<div class="number">{caller_number}</div>',
-              '<div class="details">{time_of_day} | {duration}</div>',
-            '</div>',
-        '</tpl>'
-        ].join(''),
-        itemSelector: 'div.call',
-        singleSelect: true,
-        listeners: {
-          'activate': function(t){
-            Ext.getBody().mask(false, '<div class="demos-loading">Loading&hellip;</div>');
-            loadCalls();
-          },
-          'selectionchange': function(v,r){
-            var data = v.getSelectedRecords();
-            var player = new Ext.Audio({
-              autoRender: true,
-              floating: true,
-              modal: true,
-              centered: true,
-              hideOnMaskTap: true,
-              height: 220,
-              width: 220,
-              url: 'http://stg.g5search.com/calls/listen/' + data[0].call_id
-            });
-            player.show();
-            return true;
-          }
-        }
-      });
-      
-      var appList = new Ext.NestedList({
+      var homeScreen = new Ext.Panel({
         fullscreen: true,
         title: 'Home',
+        text: 'Home',
+        cls: 'splash',
+        iconCls: 'favorites',
+        html: '<p><img src="g5.jpg" /></p><p><em>This is only a test of the geefive skunkwerks system.</em></p>'
+      });
+      
+      var reportList = new Ext.NestedList({
+        fullscreen: true,
+        title: 'Reports',
+        text: 'Reports',
         xtype: 'nestedlist',
         cls: 'card5',
-        iconCls: 'bookmarks',
+        iconCls: 'settings',
         fullscreen: true,
         listeners: {
           'activate': function(t){ 
             showHideLogout();
           }
         },
-        items: []
+        items: [{
+          text: 'Leads Graphs',
+          items: [{
+            text: 'Week To Date',
+            handler: function(){
+              var graph = new geefive.leadGraph({
+                client_id: client_id,
+                title: "This Week's Leads",
+                range: 'week'
+              });
+              graph.loadGraphData();
+            }
+          },{
+            text: 'Month To Date',
+            handler: function(){
+              var graph = new geefive.leadGraph({
+                client_id: client_id,
+                title: "This Month's Leads",
+                range: 'month'
+              });
+              graph.loadGraphData();
+            }
+          },{
+            text: 'Year To Date',
+            handler: function(){
+              var graph = new geefive.leadGraph({
+                client_id: client_id,
+                title: "This Year's Leads",
+                range: 'year'
+              });
+              graph.loadGraphData();
+            }
+          }]
+        }]
       });
       
       var tabpanel = new Ext.TabPanel({
@@ -284,7 +244,7 @@ Ext.setup({
         defaults: {
           scroll: 'vertical'
         },
-        items: [appList,callView,logoutTab]
+        items: [homeScreen,reportList,callView,logoutTab]
       });
     }
 });
